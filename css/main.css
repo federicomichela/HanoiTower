@@ -20,8 +20,8 @@ a { text-decoration: none; }
 a:focus { outline: 0px; }
 
 h1 {
-	font-family: "dalekregular";
-	font-size: 3.5em;
+	font-family: "zenzai_itacharegular";
+	font-size: 5em;
 	margin: 0;
 	padding: 0 50px;
 }
@@ -106,7 +106,7 @@ button.btn-level div:nth-child(1) {
 	background-color: #d4cdcd;
 }
 button.btn-level div:nth-child(2) {
-	font-size: 1.2em;
+	font-size: 2em;
 	font-family: "viking-normalregular";
 	background-color: #2a0808;
 }
