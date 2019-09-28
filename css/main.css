@@ -19,16 +19,16 @@ body.full-screen { overflow: hidden; }
 a { text-decoration: none; }
 a:focus { outline: 0px; }
 
-h1, h2 {
+h1.gameName, h2.gameName {
 	font-family: "zenzai_itacharegular";
 	margin: 0;
 	color: #7f6a6a;
 }
-h1 {
+h1.gameName {
 	font-size: 3.5em;
 	padding: 0 50px;
 }
-h2 { font-size: 2em; }
+h2.gameName { font-size: 2em; }
 
 footer {
 	padding: 30px 20px;
