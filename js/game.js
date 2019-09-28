@@ -29,6 +29,8 @@ class HanoiTower {
         this._checkGameFocusIntervalId;
         this._gameThemePaused = false;
         this._gameCompleted = false;
+
+        this._abstractMakeMove = this._makeMove.bind(this);
     }
 
     /**
@@ -45,10 +47,7 @@ class HanoiTower {
 
         this._towers[0].querySelector(":last-child").classList.add("active");
 
-        document.getElementById("gameContainer").addEventListener(
-            "click",
-            this._makeMove.bind(this)
-        );
+        document.getElementById("gameContainer").addEventListener("click", this._abstractMakeMove);
 
         this._startTime = new Date();
 
@@ -112,6 +111,8 @@ class HanoiTower {
     destroy() {
         clearInterval(this._clockId);
         clearInterval(this._checkGameFocusIntervalId);
+
+        document.getElementById("gameContainer").removeEventListener("click", this._abstractMakeMove);
     }
 
 
