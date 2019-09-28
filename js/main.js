@@ -1,159 +1,320 @@
-/**
- * HanoiTower is the class that handles the game initialization and the game flow
- */
-class HanoiTower {
-    /**
-     * Class constructor - triggers game initialization
-     *
-     * @param {type} numberOfDisks Description
-     * @returns {type} Description
-     */
-    constructor(numberOfDisks) {
-        this._numberOfDisks = numberOfDisks || 3;
-        this._holding = null;
-        this._towers = document.getElementsByClassName("tower");
-    }
-
-    /**
-     * _initGame - Allocates disks on the first tower
-     *
-     * @returns {type} Description
-     */
-    initGame() {
-        [...this._towers].forEach(tower => tower.html = "");
-
-        for (let i=this._numberOfDisks-1; i>=0; i--) {
-            this._addDisk(this._towers[0], i);
-        }
-
-        this._towers[0].querySelector(":last-child").classList.add("active");
-
-        document.getElementById("gameContainer").addEventListener(
-            "click",
-            this._makeMove.bind(this)
-        );
-    }
-
-    /**
-     * _addDisk - Creates a disk DOM element and appends it to a tower
-     *
-     * @param {type} tower Description
-     * @param {type} id    Description
-     * @private
-     * @returns {type} Description
-     */
-    _addDisk(tower, id) {
-        let disk = document.createElement("li");
-
-        disk.classList.add("disk", `disk-${id}`);
-        disk.setAttribute("value", id);
-
-        tower.appendChild(disk);
-    }
-
-    /**
-     * _makeMove - Select a disk or move it to a different tower
-     *
-     * @param {type} event Description
-     * @private
-     * @returns {type} Description
-     */
-    _makeMove(event) {
-        if (event.target.classList.contains("disk")) {
-            let topDisk = event.target;
-            let tower = topDisk.parentElement;
-            let towerTopDisk = tower.querySelector(":last-child");
-            let topDiskValue = topDisk.getAttribute("value");
-            let holdingDisk = document.querySelector("#gameContainer .hold");
-
-            // prevent more disks to be selected at the same time and
-            // prevent lower disks to be selected in a tower
-            if (!holdingDisk && topDisk === towerTopDisk) {
-                topDisk.classList.add("hold");
-                this._disableAllDisks();
-                this._holding = topDiskValue;
-            }
-        } else if (event.target.classList.contains("tower")) {
-            let tower = event.target;
-            let towerID = parseInt(tower.getAttribute("value"));
-            let disks = tower.getElementsByClassName("disk");
-            let topDisk = tower.querySelector(":last-child");
-            let topDiskValue = topDisk ? topDisk.getAttribute("value") : null;
-            let holdingDisk = document.querySelector("#gameContainer .hold");
-
-            if (holdingDisk && towerID) {
-                if (topDiskValue === this._holding) {
-                    holdingDisk.classList.remove("hold");
-                    this._restoreDisksDefaultBehavior();
-                } else if (topDiskValue === null || topDiskValue > this._holding) {
-                    holdingDisk.parentElement.removeChild(holdingDisk);
-                    this._addDisk(tower, this._holding);
-                    this._restoreDisksDefaultBehavior();
-                }
-            }
-
-            this._checkGameComplete(tower);
-        }
-    }
-
-    /**
-     * _checkGameComplete - Verifies if all disks have been moved to a different
-     * tower from the original one. If not, updates the moves & rating.
-     *
-     * @param {type} tower Description
-     * @private
-     * @returns {type} Description
-     */
-    _checkGameComplete(tower) {
-        let towerID = parseInt(tower.getAttribute("value"));
-        let towerDisks = tower.getElementsByClassName("disk").length;
-        let gameCompleted = false;
-
-        if (towerID && (towerDisks === this._numberOfDisks)) {
-            gameCompleted = true;
-            setTimeout(this._completeGame.bind(this), 500);
-        } else {
-            // TODO: updates the moves & rating
-        }
-
-        return gameCompleted;
-    }
-
-    /**
-     * _completeGame - Shows a game completed dialog to the player
-     *
-     * @returns {type} Description
-     */
-    _completeGame() {
-        alert("game completed");
-    }
-
-    /**
-     * _disableAllDisks - Changes the style to remove the pointer cursor from
-     *  all disks
-     * @private
-     * @returns {type} Description
-     */
-    _disableAllDisks() {
-        [...document.getElementsByClassName("disk")].forEach(
-            disk => disk.style.cursor = "default"
-        );
-    }
-
-    /**
-     * _restoreDisksDefaultBehavior - Restores the original style of disks
-     * @private
-     * @returns {type} Description
-     */
-    _restoreDisksDefaultBehavior() {
-        [...document.getElementsByClassName("disk")].forEach(
-            disk => disk.style.cursor = null
-        );
-    }
+let gameMatch, checkGameFocusIntervalID;
+let gameThemePaused = false;
+let sounds = {
+	"gameTheme": new Audio("audio/celticTheme.wav"),
+	"pairMatch": new Audio("audio/matchFound.wav"),
+	"wrongMatch": new Audio("audio/wrongMatch.wav"),
+	"levelComplete": new Audio("audio/levelComplete.mp3"),
 }
 
-document.addEventListener('DOMContentLoaded', (event) => {
-    const game = new HanoiTower(3);
+sounds.gameTheme.loop = true;
 
-    game.initGame();
+/**
+ * Pause game theme sound when page loses focus
+ */
+function checkGameFocus() {
+	if (!document.hasFocus()) {
+		sounds.gameTheme.pause();
+		gameThemePaused = true;
+	} else {
+		if (gameThemePaused) {
+			sounds.gameTheme.play();
+			gameThemePaused = false;
+		}
+	}
+}
+
+/*
+ * Method to resize the game pages to match the whole window resize
+ */
+function resizeSections() {
+	let sections = document.getElementsByClassName("flexi-section");
+	let style = `height: ${window.innerHeight}px;`;
+
+	for (let section of sections)
+	{
+		section.style.cssText = style;
+	}
+}
+
+/*
+ * Show home page section (hide all the others)
+ */
+function showHome() {
+	document.getElementById("homeSection").classList.remove("hidden");
+	document.getElementById("gameSection").classList.add("hidden");
+
+	if (!document.getElementById("gameResultSection").classList.contains("hidden")) {
+		dismissGameResult();
+	}
+
+	addHomeListeners();
+	removeGameListeners();
+	checkResumeButton();
+
+	sounds.gameTheme.pause();
+}
+
+/*
+ * Show game section (hide all the others)
+ */
+function showGame() {
+	gameMatch.initGame();
+
+	document.getElementById("homeSection").classList.add("hidden");
+	document.getElementById("gameSection").classList.remove("hidden");
+
+	if (!document.getElementById("gameResultSection").classList.contains("hidden")) {
+		dismissGameResult();
+	}
+
+	removeHomeListeners();
+	addGameListeners();
+
+	sounds.gameTheme.play();
+}
+
+/*
+ * Show game result "dialog"
+ */
+function showGameResult() {
+	document.getElementById("gameResultSection").classList.remove("hidden");
+
+	// to simulate a real dialog prevent page scrolling by hiding overflow
+	document.querySelector("body").classList.add("full-screen");
+
+	// update dialog with game results
+	document.getElementById("gameTotalTime").innerText = `Total time: ${gameMatch.getElapsedTime()}`;
+
+	// update stars rating
+	let rating = gameMatch.getStarRating();
+	let starRate = 100 / MAX_STARS;
+
+	for (let star of document.querySelectorAll(".star")) {
+		if (rating - starRate > 0) {
+			star.querySelector(".star-inner").style.width = "100%";
+			rating -= starRate;
+		} else if (rating > 0) {
+			let starPerc = (100 * rating) / starRate;
+			star.querySelector(".star-inner").style.width = `${starPerc}%`;
+			rating -= starRate;
+		} else {
+			star.querySelector(".star-inner").style.width = "0%";
+		}
+	}
+
+	for (let sound in sounds) {
+		sounds[sound].pause();
+		sounds[sound].load();
+	}
+	sounds.levelComplete.play();
+
+	disableResumeButtons();
+	removeHomeListeners();
+	removeGameListeners();
+	addGameResultListeners();
+}
+
+/*
+ * Hide game result dialog
+ */
+function dismissGameResult() {
+	document.getElementById("gameResultSection").classList.add("hidden");
+
+	// re-enable overflow on page
+	document.querySelector("body").classList.remove("full-screen");
+
+	removeGameResultListeners();
+}
+
+/**
+ * Make resume buttons available
+ */
+function enableResumeButtons() {
+	for (let btn of document.querySelectorAll(".btn-resume")) {
+		btn.classList.remove("hidden");
+	}
+}
+
+/**
+ * Make resume buttons unavailable
+ */
+function disableResumeButtons() {
+	for (let btn of document.querySelectorAll(".btn-resume")) {
+		btn.classList.add("hidden");
+	}
+}
+
+/**
+ * Disable resume button when selected level button does not match with current
+ * game level. Enable otherwise.
+ */
+function checkResumeButton() {
+	let resumeBtn = document.querySelector(".btn-resume");
+	let selectedLevelButton = document.querySelector(".btn-level.selected");
+
+	if (!resumeBtn.classList.contains("hidden")) {
+		if (selectedLevelButton.dataset.level != gameMatch.getLevel()) {
+			resumeBtn.disabled = true;
+		} else {
+			resumeBtn.disabled = false;
+		}
+	}
+}
+
+/*
+ * Start a new game on a specified level
+ * @param level {Number}
+ */
+function initialiseGame(level) {
+	gameMatch = new HanoiTower(level, showGameResult);
+
+	enableResumeButtons();
+	showGame();
+}
+
+/*
+ * Start a new game from the selected level
+ */
+function startGame() {
+	let levelSelected = document.querySelector(".btn-level.selected").dataset.level;
+
+	sounds.gameTheme.load();
+
+	initialiseGame(levelSelected);
+}
+
+/*
+ * Start a new game from the current game level
+ */
+function resetGame() {
+	let level = gameMatch.getLevel();
+
+	initialiseGame(level);
+}
+
+/*
+ * Reset to a new game with higher level
+ */
+function levelUp() {
+	let nextLevel = parseInt(gameMatch.getLevel()) + 1;
+
+	initialiseGame(nextLevel);
+}
+
+/*
+ * Event callback method to select a level
+ * @param event {Object}
+ */
+function selectLevel(event) {
+	if (event.target.classList.contains("btn-level")) {
+		// remove selection from currently selected button
+		let currentlySelectedButton = document.querySelector(".btn-level.selected");
+		if (currentlySelectedButton) {
+			currentlySelectedButton.classList.remove("selected")
+		}
+		// add selection to the button that has just been clicked
+		event.target.classList.add("selected");
+
+		// eventually disable resume option
+		checkResumeButton();
+	}
+}
+
+/**
+ * Add loading class to clicked button then show the game page
+ *
+ * @param {Object} event
+ */
+function loadGame(event) {
+	let callback = startGame;
+	event.target.classList.add("loading");
+
+	if (event.target.classList.contains("btn-resume")) {
+		callback = showGame;
+	}
+
+	setTimeout(() => {
+		for (let loadingElement of document.querySelectorAll(".loading")) {
+			loadingElement.classList.remove("loading");
+		}
+
+		callback();
+	}, 1000);
+}
+
+/*
+ * Listen to a click event on the level buttons to select it.
+ * Also listen to the resume button to go back to the game without restarting it.
+ */
+function addHomeListeners() {
+	document.getElementById("levelOptions").addEventListener("click", selectLevel);
+	document.querySelector(".btn-resume").addEventListener("click", loadGame);
+}
+
+/*
+ * Stop listening to the interactions on the level and resume buttons.
+ */
+function removeHomeListeners() {
+	document.getElementById("levelOptions").removeEventListener("click", selectLevel);
+	document.querySelector(".btn-resume").removeEventListener("click", loadGame);
+}
+
+/*
+ * Listen to a click event on each card in the grid in order to flip the card
+ */
+function addGameListeners() {
+	checkGameFocusIntervalID = setInterval(checkGameFocus, 300);
+}
+
+/*
+ * Stop listening to the interactions on the cards
+ */
+function removeGameListeners() {
+	clearInterval(checkGameFocusIntervalID);
+}
+
+/*
+ * Listen to a click even on the level up button
+ */
+function addGameResultListeners() {
+	document.querySelector("#gameResultSection .dialog .btn-levelup").addEventListener("click", levelUp);
+}
+
+
+/*
+ * Stop listening to the level up button click
+ */
+function removeGameResultListeners() {
+	document.querySelector("#gameResultSection .dialog .btn-levelup").removeEventListener("click", levelUp);
+}
+
+/*
+ * Listen to a click event on all the buttons in the pages
+ */
+function addNavigationListeners() {
+	// when a start or reset button is clicked, initialise a new game with the selected level
+	let startGameButtons = document.querySelectorAll(".btn-start");
+	for (let btn of startGameButtons) {
+		btn.addEventListener("click", loadGame);
+	}
+
+	let resetGameButtons = document.querySelectorAll(".btn-reset");
+	for (let btn of resetGameButtons) {
+		btn.addEventListener("click", resetGame);
+	}
+
+	// when an home button is clicked, show the home section
+	let homeButtons = document.querySelectorAll(".btn-home");
+	for (let btn of homeButtons) {
+		btn.addEventListener("click", showHome);
+	}
+}
+
+window.onresize = resizeSections;
+
+document.addEventListener('DOMContentLoaded', (event) => {
+	resizeSections();
+	addNavigationListeners();
+	addHomeListeners();
 });
