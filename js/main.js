@@ -167,6 +167,10 @@ function checkResumeButton() {
  * @param level {Number}
  */
 function initialiseGame(level) {
+	if (gameMatch)
+	{
+		gameMatch.destroy();
+	}
 	gameMatch = new HanoiTower(level, showGameResult);
 
 	enableResumeButtons();

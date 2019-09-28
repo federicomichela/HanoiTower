@@ -87,6 +87,25 @@ class HanoiTower {
     }
 
     /**
+    * Returns the level of the game
+    *
+    * @returns {Number} (for a list of available levels see GAME_LEVELS const)
+    */
+    getLevel() {
+        return this._level;
+    }
+
+
+    /**
+     * destroy - Stops time elapsed updated.
+     * Object won't be used anymore so JS Garbage Collector will actually
+     * destroy the object by wiping the memory allocated by this game instance
+     */
+    destroy() {
+        clearInterval(this._clockId);
+    }
+
+    /**
      * _addDisk - Creates a disk DOM element and appends it to a tower
      *
      * @param {type} tower Description
