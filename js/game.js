@@ -48,6 +48,7 @@ class HanoiTower {
         this._towers[0].querySelector(":last-child").classList.add("active");
 
         document.getElementById("gameContainer").addEventListener("click", this._abstractMakeMove);
+        document.getElementById("gameContainer").addEventListener("touchend", this._abstractMakeMove);
 
         this._startTime = new Date();
 
@@ -156,31 +157,37 @@ class HanoiTower {
      * @returns {type} Description
      */
     _makeMove(event) {
-        if (event.target.classList.contains("disk")) {
-            let topDisk = event.target;
-            let tower = topDisk.parentElement;
-            let towerTopDisk = tower.querySelector(":last-child");
-            let topDiskValue = topDisk.getAttribute("value");
-            let holdingDisk = document.querySelector("#gameContainer .hold");
+        let targetIsTower = event.target.classList.contains("tower");
+        let targetIsDisk = event.target.classList.contains("disk");
+
+        if (event.type === "click" && (targetIsTower||targetIsDisk)) {
+            let tower, topDisk, topDiskValue, holdingDisk;
+            let towerTopDisk;
+
+            if (targetIsTower) {
+                tower = event.target;
+                topDisk = tower.querySelector(":last-child");
+            } else {
+                topDisk = event.target;
+                tower = topDisk.parentElement;
+                towerTopDisk = tower.querySelector(":last-child");
+            }
+
+            holdingDisk = document.querySelector("#gameContainer .hold");
+            topDiskValue = topDisk ? topDisk.getAttribute("value") : null;
 
             // prevent more disks to be selected at the same time and
             // prevent lower disks to be selected in a tower
-            if (!holdingDisk && topDisk === towerTopDisk) {
+            if (!holdingDisk) {
+                if (towerTopDisk && towerTopDisk !== topDisk) {
+                    return;
+                }
                 topDisk.classList.add("hold");
                 this._disableAllDisks();
                 this._holding = topDiskValue;
 
                 GAME_SOUNDS.move.play();
-            }
-        } else if (event.target.classList.contains("tower")) {
-            let tower = event.target;
-            let towerID = parseInt(tower.getAttribute("value"));
-            let disks = tower.getElementsByClassName("disk");
-            let topDisk = tower.querySelector(":last-child");
-            let topDiskValue = topDisk ? topDisk.getAttribute("value") : null;
-            let holdingDisk = document.querySelector("#gameContainer .hold");
-
-            if (holdingDisk) {
+            } else if (holdingDisk) {
                 let moved = (topDiskValue === this._holding) ||
                             (topDiskValue === null || topDiskValue > this._holding);
 
