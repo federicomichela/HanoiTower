@@ -1,6 +1,10 @@
 # HanoiTower
 
 2D adaptation of the classic Hanoi Tower game.
+Click on a disk to select it.
+Click on a tower to the selected disk on it.
+Only the disk at the top of a tower can be selected.
+Only one disk at the time can be selected.
 This projects features es6, html5 and css3.
 
 ## To Run: ##
