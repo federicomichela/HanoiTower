@@ -180,20 +180,20 @@ button.btn-full:disabled { color: #a99c9c; }
 }
 
 
-#gameContainer { height: calc(100% - 173px); }
+#gameContainer { height: calc(100% - 162px); }
 
 #gameSection {
 	align-content: flex-start;
 	color: #7f6a6a;
 }
 
-#gameHeader {
+#gameHeader, #gameInfos {
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
 	font-size: 1em;
 }
-
+#gameInfos { padding: 0; }
 #gameLevelDescription { font-size: 1.5em; }
 
 #gameActions > button {

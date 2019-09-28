@@ -57,7 +57,7 @@
                 </div>
             </section>
 
-            <!-- GAME PAGE: uncover two cards at the time to find a match until the whole grid is uncovered -->
+            <!-- GAME PAGE: move disks from one tower to another to recreate the original pyramid -->
             <section id="gameSection" class="flexi-section hidden">
                 <div class="container">
                     <div id="gameHeader" class="row">
@@ -68,8 +68,10 @@
                             <button class="btn-home"><i class="fas fa-home"></i></button>
                         </div>
                     </div>
-                    <div id="gameTimeElapsed" class="row">0h 0m 0s</div>
-                    <div id="gameMoves" class="row">0 moves</div>
+                    <div id="gameInfos" class="row">
+                        <div id="gameTimeElapsed">0h 0m 0s</div>
+                        <div id="gameMoves">0 moves</div>
+                    </div>
                     <div id="gameContainer" class="row">
                         <ul class="tower" id="tower-1" value="0"></ul>
                         <ul class="tower" id="tower-2" value="1"></ul>
