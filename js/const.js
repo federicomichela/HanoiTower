@@ -17,3 +17,12 @@ const GAME_ACTIONS = {
 };
 
 const MAX_STARS = 5;
+
+const GAME_SOUNDS = {
+	"gameTheme": new Audio("audio/puzzleGame.mp3"),
+	"move": new Audio("audio/woodKnock.wav"),
+	"drop": new Audio("audio/drop.wav"),
+	"levelComplete": new Audio("audio/levelComplete.mp3"),
+};
+
+GAME_SOUNDS.gameTheme.loop = true;

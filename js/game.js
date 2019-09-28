@@ -26,6 +26,9 @@ class HanoiTower {
 		this._starRating = 100;
 
         this._clockId;
+        this._checkGameFocusIntervalId;
+        this._gameThemePaused = false;
+        this._gameCompleted = false;
     }
 
     /**
@@ -56,6 +59,11 @@ class HanoiTower {
     	}, 1000);
 
     	document.getElementById("gameLevelDescription").innerText = `Level ${GAME_LEVELS[this._level]}`;
+
+        this._checkGameFocusIntervalId = setInterval(this._checkGameFocus.bind(this), 300);
+
+        GAME_SOUNDS.gameTheme.load();
+        GAME_SOUNDS.gameTheme.play();
     }
 
 	/**
@@ -103,7 +111,24 @@ class HanoiTower {
      */
     destroy() {
         clearInterval(this._clockId);
+        clearInterval(this._checkGameFocusIntervalId);
     }
+
+
+    /**
+     * Pause game theme sound when page loses focus
+     */
+     _checkGameFocus() {
+     	if (!document.hasFocus()) {
+     		GAME_SOUNDS.gameTheme.pause();
+     		this._gameThemePaused = true;
+     	} else {
+     		if (this._gameThemePaused && !this._onGameCompleted) {
+     			GAME_SOUNDS.gameTheme.play();
+     			this._gameThemePaused = false;
+     		}
+     	}
+     }
 
     /**
      * _addDisk - Creates a disk DOM element and appends it to a tower
@@ -143,6 +168,8 @@ class HanoiTower {
                 topDisk.classList.add("hold");
                 this._disableAllDisks();
                 this._holding = topDiskValue;
+
+                GAME_SOUNDS.move.play();
             }
         } else if (event.target.classList.contains("tower")) {
             let tower = event.target;
@@ -153,16 +180,21 @@ class HanoiTower {
             let holdingDisk = document.querySelector("#gameContainer .hold");
 
             if (holdingDisk) {
+                let moved = (topDiskValue === this._holding) ||
+                            (topDiskValue === null || topDiskValue > this._holding);
+
                 if (topDiskValue === this._holding) {
                     holdingDisk.classList.remove("hold");
-                    this._restoreDisksDefaultBehavior();
                 } else if (topDiskValue === null || topDiskValue > this._holding) {
                     holdingDisk.parentElement.removeChild(holdingDisk);
                     this._addDisk(tower, this._holding);
-                    this._restoreDisksDefaultBehavior();
                 }
 
-                this._checkGameComplete(tower);
+                if (moved) {
+                    GAME_SOUNDS.drop.play();
+                    this._restoreDisksDefaultBehavior();
+                    this._checkGameComplete(tower);
+                }
             }
         }
     }
@@ -200,6 +232,7 @@ class HanoiTower {
      */
     _completeGame() {
         this._stopTime = new Date();
+        this._gameCompleted = true;
 
         setTimeout(this._onGameCompleted.bind(this), 0);
     }

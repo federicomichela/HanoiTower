@@ -1,28 +1,4 @@
-let gameMatch, checkGameFocusIntervalID;
-let gameThemePaused = false;
-let sounds = {
-	"gameTheme": new Audio("audio/celticTheme.wav"),
-	"pairMatch": new Audio("audio/matchFound.wav"),
-	"wrongMatch": new Audio("audio/wrongMatch.wav"),
-	"levelComplete": new Audio("audio/levelComplete.mp3"),
-}
-
-sounds.gameTheme.loop = true;
-
-/**
- * Pause game theme sound when page loses focus
- */
-function checkGameFocus() {
-	if (!document.hasFocus()) {
-		sounds.gameTheme.pause();
-		gameThemePaused = true;
-	} else {
-		if (gameThemePaused) {
-			sounds.gameTheme.play();
-			gameThemePaused = false;
-		}
-	}
-}
+let gameMatch;
 
 /*
  * Method to resize the game pages to match the whole window resize
@@ -49,10 +25,9 @@ function showHome() {
 	}
 
 	addHomeListeners();
-	removeGameListeners();
 	checkResumeButton();
 
-	sounds.gameTheme.pause();
+	GAME_SOUNDS.gameTheme.pause();
 }
 
 /*
@@ -69,9 +44,6 @@ function showGame() {
 	}
 
 	removeHomeListeners();
-	addGameListeners();
-
-	sounds.gameTheme.play();
 }
 
 /*
@@ -103,15 +75,14 @@ function showGameResult() {
 		}
 	}
 
-	for (let sound in sounds) {
-		sounds[sound].pause();
-		sounds[sound].load();
+	for (let sound in GAME_SOUNDS) {
+		GAME_SOUNDS[sound].pause();
+		GAME_SOUNDS[sound].load();
 	}
-	sounds.levelComplete.play();
+	GAME_SOUNDS.levelComplete.play();
 
 	disableResumeButtons();
 	removeHomeListeners();
-	removeGameListeners();
 	addGameResultListeners();
 }
 
@@ -182,8 +153,6 @@ function initialiseGame(level) {
  */
 function startGame() {
 	let levelSelected = document.querySelector(".btn-level.selected").dataset.level;
-
-	sounds.gameTheme.load();
 
 	initialiseGame(levelSelected);
 }
@@ -262,20 +231,6 @@ function addHomeListeners() {
 function removeHomeListeners() {
 	document.getElementById("levelOptions").removeEventListener("click", selectLevel);
 	document.querySelector(".btn-resume").removeEventListener("click", loadGame);
-}
-
-/*
- * Listen to a click event on each card in the grid in order to flip the card
- */
-function addGameListeners() {
-	checkGameFocusIntervalID = setInterval(checkGameFocus, 300);
-}
-
-/*
- * Stop listening to the interactions on the cards
- */
-function removeGameListeners() {
-	clearInterval(checkGameFocusIntervalID);
 }
 
 /*
