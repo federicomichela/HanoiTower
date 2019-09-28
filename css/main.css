@@ -19,12 +19,16 @@ body.full-screen { overflow: hidden; }
 a { text-decoration: none; }
 a:focus { outline: 0px; }
 
-h1 {
+h1, h2 {
 	font-family: "zenzai_itacharegular";
-	font-size: 5em;
 	margin: 0;
+	color: #7f6a6a;
+}
+h1 {
+	font-size: 3.5em;
 	padding: 0 50px;
 }
+h2 { font-size: 2em; }
 
 footer {
 	padding: 30px 20px;
