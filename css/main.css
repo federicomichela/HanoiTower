@@ -7,9 +7,9 @@ html {
 }
 
 body {
-	font-family: "viking-normalregular";
+	font-family: 'Raleway', sans-serif;
 	font-weight: normal;
-	font-size: 12px;
+	font-size: 1em;
 	color: #424242;
 	background-color: #eceeef;
 	text-align: center;
@@ -68,7 +68,6 @@ section .container {
 
 .btn-wrapper > span {
 	font-size: 1.4em;
-	font-family: "mediaeval";
 }
 
 button {
@@ -101,19 +100,16 @@ button.btn-level div {
 	border-radius: 100%;
 }
 button.btn-level div:nth-child(1) {
-	font-family: "odins_spear_hollowRg";
 	font-size: 4.5em;
 	background-color: #d4cdcd;
 }
 button.btn-level div:nth-child(2) {
 	font-size: 2em;
-	font-family: "viking-normalregular";
 	background-color: #2a0808;
 }
 
 button.btn-full {
 	padding: 10px;
-	font-family: "viking-normalregular";
 	display: flex;
 	justify-content: center;
 	align-items: center;
