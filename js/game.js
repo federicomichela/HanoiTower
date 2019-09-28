@@ -124,7 +124,7 @@ class HanoiTower {
      		GAME_SOUNDS.gameTheme.pause();
      		this._gameThemePaused = true;
      	} else {
-     		if (this._gameThemePaused && !this._onGameCompleted) {
+     		if (this._gameThemePaused && !this._gameCompleted) {
      			GAME_SOUNDS.gameTheme.play();
      			this._gameThemePaused = false;
      		}
